@@ -9,6 +9,8 @@
 // Tags: #Arrays #TwoVariables
 // ------------------------------------------------------------
 
+import java.util.ArrayList;
+
 public class Question2 {
 
   public static int getSecondLargest(int[] arr) {
@@ -43,84 +45,96 @@ public class Question2 {
         secondLargest = value;
       }
 
-      // Note: We skip if value equals largest (duplicate)
-      // Note: We skip if value is too small (not in top 2)
+      // Note: Skip if value == largest (duplicate) OR value <= secondLargest
     }
 
     // WHY: Check if we actually found a second largest
     // WHAT: If still MIN_VALUE, no second distinct element exists
     // HOW: Return -1 to indicate "not found"
-    if (secondLargest == Integer.MIN_VALUE) {
-      return -1;
+    return (secondLargest == Integer.MIN_VALUE) ? -1 : secondLargest;
+  }
+
+  public static ArrayList<Integer> getSmallestValues(int[] arr) {
+
+    // WHY: Start with maximum values
+    // WHAT: MAX_VALUE ensures any real element is smaller
+    // HOW: Will update when we find smaller values
+    int small = Integer.MAX_VALUE;
+    int secondSmall = Integer.MAX_VALUE;
+
+    // WHY: Check every element to find two smallest
+    // WHAT: Loop through all values
+    // HOW: Similar logic as largest, but reversed comparisons
+    for (int value : arr) {
+
+      // WHY: Found new smallest element
+      // WHAT: Current value is smaller than our current smallest
+      // HOW: Move old smallest up to second, new value becomes smallest
+      if (value < small) {
+        secondSmall = small; // Old smallest becomes second
+        small = value; // New value becomes smallest
+      }
+
+      // WHY: Found potential second smallest
+      // WHAT: Value is larger than smallest BUT smaller than current second
+      // HOW: Update only secondSmall, leave small unchanged
+      else if (value != small && value < secondSmall) {
+        secondSmall = value;
+      }
     }
 
-    return secondLargest;
+    // WHY: Return both smallest values
+    // WHAT: Create list with small and secondSmall
+    // HOW: Check if secondSmall was found, otherwise return [-1]
+    ArrayList<Integer> ans = new ArrayList<>();
+    if (secondSmall != Integer.MAX_VALUE) {
+      ans.add(small);
+      ans.add(secondSmall);
+    } else {
+      ans.add(-1);
+    }
+
+    return ans;
   }
 
   public static void main(String[] args) {
     int arr[] = { 12, 35, 1, 10, 34, 1 };
-    int result = getSecondLargest(arr);
-    System.out.println("The second largest element is: " + result);
+    System.out.println("Second largest: " + getSecondLargest(arr));
     // Output: 34
+
+    int arr2[] = { 2, 4, 3, 5, 6 };
+    System.out.println("Smallest values: " + getSmallestValues(arr2));
+    // Output: [2, 3]
   }
 }
 
+// ⚡ Time: O(n) | Space: O(1)
+// 🗣️ Interview: "Track two variables. If element > largest, cascade update.
+// If between them, update second only."
+
 // ------------------------------------------------------------
-// ⚡ COMPLEXITY
+// 🧠 TRACE: arr = [12, 35, 1, 10, 34, 1]
 // ------------------------------------------------------------
-// Time: O(n) - Single pass through array
-// Space: O(1) - Only two variables used
-//
-// ------------------------------------------------------------
-// 🎯 PATTERN: Two-Variable Tracking
-// 🗣️ Interview: "Track largest and secondLargest. When find bigger than
-// largest, cascade old largest to second. When find value
-// between them, update second only."
-//
-// ------------------------------------------------------------
-// 🧠 EXECUTION TRACE: arr = [12, 35, 1, 10, 34, 1]
-// ------------------------------------------------------------
-//
-// Start: largest=12, secondLargest=MIN_VALUE
-//
-// value=12: (first element, already set)
-// value=35: 35 > 12 → secondLargest=12, largest=35
+// Start: largest=12, second=MIN
+// value=35: 35>12 → second=12, largest=35
 // value=1: skip (too small)
 // value=10: skip (10 not > 12)
-// value=34: 34 < 35 && 34 > 12 → secondLargest=34 ✓
-// value=1: skip (too small)
-//
+// value=34: 34<35 && 34>12 → second=34 ✓
 // Result: 34
-//
+
 // ------------------------------------------------------------
-// 🔑 KEY INSIGHT: Why check "value < largest"?
+// 🔑 KEY INSIGHT: Why "value < largest"?
 // ------------------------------------------------------------
+// arr = [10, 20, 20, 5]
 //
-// Example: arr = [10, 20, 20, 5]
+// WITHOUT check: second 20 becomes secondLargest ✗
+// WITH check: second 20 skipped, secondLargest stays 10 ✓
 //
-// WITHOUT "value < largest":
-// When we hit second 20:
-// 20 > secondLargest → secondLargest becomes 20 ✗ WRONG!
-//
-// WITH "value < largest":
-// When we hit second 20:
-// 20 < 20? NO → skip ✓ CORRECT!
-// secondLargest stays 10
-//
-// This prevents duplicates of largest from becoming second!
-//
+// Prevents duplicates of largest from becoming second!
+
 // ------------------------------------------------------------
 // 🧠 EDGE CASES
 // ------------------------------------------------------------
-//
-// All same [5, 5, 5, 5]:
-// largest=5, secondLargest=MIN_VALUE → returns -1 ✓
-//
-// Two values [10, 5, 10, 5]:
-// largest=10, secondLargest=5 → returns 5 ✓
-//
-// Negatives [-5, -2, -10]:
-// largest=-2, secondLargest=-5 → returns -5 ✓
-//
-// Single element [42]:
-// largest=42, secondLargest=MIN_VALUE → returns -1 ✓
+// All same [5,5,5] → -1 (no second distinct)
+// Negatives [-5,-2,-10] → -5 (second largest)
+// Single element [42] → -1 (no second element)
